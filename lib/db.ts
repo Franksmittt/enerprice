@@ -2,6 +2,7 @@ import "server-only";
 import { randomUUID } from "crypto";
 import { mkdir, readFile, rename, rm, writeFile } from "fs/promises";
 import path from "path";
+import { DATA_DIR } from "./data-dir";
 import {
   DEFAULT_PRICELIST_NOTES,
   DEFAULT_WARRANTY_TERMS,
@@ -16,7 +17,6 @@ import {
 } from "./seed";
 import type { Database, Product } from "./types";
 
-const DATA_DIR = path.join(process.cwd(), "data");
 const DB_FILE = path.join(DATA_DIR, "db.json");
 
 let queue: Promise<unknown> = Promise.resolve();
