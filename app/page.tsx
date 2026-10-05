@@ -1,69 +1,96 @@
-import Image from "next/image";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { FileSpreadsheet, Layers, Search, ShieldCheck } from "lucide-react";
+import { LoginForm } from "@/components/login-form";
+import { BrandStripe, Wordmark } from "@/components/wordmark";
+import { getSession } from "@/lib/auth";
+import { readDb } from "@/lib/db";
+import { DEMO_LOGINS } from "@/lib/seed";
 
-export default function Home() {
+const POINTS = [
+  { icon: Search, title: "One place, every product", body: "No more sifting through 20 PDFs. Search by code or browse by category." },
+  { icon: Layers, title: "Your price, only yours", body: "Every account sees the pricing tier Enertec has allocated to them." },
+  { icon: FileSpreadsheet, title: "Always the latest list", body: "When Enertec updates a cost, every customer's price updates instantly." },
+  { icon: ShieldCheck, title: "Secure trade access", body: "Approved wholesale accounts only. Prices are never public." },
+];
+
+export default async function Home() {
+  const session = await getSession();
+  if (session) redirect(session.role === "admin" ? "/admin" : "/portal");
+  const db = await readDb();
+
+  const demos = [
+    { label: "Enertec back office", ...DEMO_LOGINS.admin },
+    { label: "Alberton Battery Mart (Tier 2)", ...DEMO_LOGINS.customer },
+    { label: "Vaal Auto Electrical (Tier 1)", email: "parts@vaalauto.example", password: "demo-t1" },
+    { label: "Highveld Fleet (Tier 3)", email: "buying@highveldfleet.example", password: "demo-t3" },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <div className="flex min-h-screen flex-col">
+      <BrandStripe />
+      <header className="border-b border-neutral-200">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 py-4">
+          <Wordmark />
+          <span className="text-sm text-neutral-500">{db.settings.priceListMonth} pricing · excl. VAT</span>
+        </div>
+      </header>
+
+      <main className="mx-auto grid w-full max-w-6xl flex-1 content-start gap-8 px-4 py-8 sm:px-6 sm:py-14 lg:grid-cols-[1.2fr_1fr] lg:gap-x-12 lg:gap-y-10">
+        <section>
+          <p className="text-sm font-semibold uppercase tracking-widest text-brand">Wholesale & dealer portal</p>
+          <h1 className="mt-3 text-3xl font-black leading-tight tracking-tight sm:text-5xl">
+            The full Enertec range.
+            <br />
+            Your trade prices.
+            <br />
+            One login.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-4 max-w-xl text-base text-neutral-600 sm:mt-5 sm:text-lg">
+            Batteries, chargers, testers and accessories with live pricing for your account, from automotive to golf cart and
+            lithium.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+        </section>
+
+        <section className="self-start rounded-xl border border-neutral-200 p-5 shadow-sm sm:p-7 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <h2 className="text-xl font-bold">Sign in</h2>
+          <p className="mb-6 mt-1 text-sm text-neutral-600">Enertec staff and approved trade accounts.</p>
+          <LoginForm demos={demos} />
+          <p className="mt-6 text-center text-sm text-neutral-600">
+            New wholesale customer?{" "}
+            <Link href="/register" className="font-semibold text-brand hover:underline">
+              Apply for a trade account
+            </Link>
+          </p>
+        </section>
+
+        <section>
+          <div className="grid gap-5 sm:grid-cols-2">
+            {POINTS.map(({ icon: Icon, title, body }) => (
+              <div key={title} className="flex gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-md bg-brand/10 text-brand">
+                  <Icon className="size-5" />
+                </span>
+                <div>
+                  <h3 className="font-semibold">{title}</h3>
+                  <p className="text-sm text-neutral-600">{body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 flex flex-wrap gap-2">
+            {db.categories.map((c) => (
+              <span key={c.id} className="rounded-full border border-neutral-200 px-3 py-1 text-sm text-neutral-700">
+                {c.name}
+              </span>
+            ))}
+          </div>
+        </section>
       </main>
+
+      <footer className="border-t border-neutral-200 py-5 text-center text-xs text-neutral-500">
+        Prices exclude VAT @ 15% and are subject to change without notice, exchange rates and stock availability.
+      </footer>
     </div>
   );
 }
